@@ -1,6 +1,6 @@
 import React, { useState, Fragment } from "react";
 
-function Formulario() {
+function Formulario({ crearCita }) {
     const [cita, setCita] = useState({
         mascota: "",
         propietario: "",
@@ -9,8 +9,6 @@ function Formulario() {
         sintomas: ""
     });
 
-    console.log(cita);
-
     const handleChange = e => {
         setCita({
             ...cita,
@@ -18,10 +16,20 @@ function Formulario() {
         });
     };
 
+    const enviarCita = e => {
+        e.preventDefault();
+        // console.log(cita);
+
+        //pasar la cita hacia el compoenente principal
+        crearCita(cita);
+
+        // Reiniciar el state
+    };
+
     return (
         <Fragment>
             <h2>Crear Cita</h2>
-            <form>
+            <form onSubmit={enviarCita}>
                 <label>Nombre Mascota</label>
                 <input
                     type="text"
@@ -71,11 +79,23 @@ function Formulario() {
     );
 }
 
+function Cita (){
+  
+}
+
 function App() {
     // useState retorna 2 funciones
     // El state actual = this.state;
     // Funcion que actualiza el state es this.setState();
-    const [state, setState] = useState();
+    const [citas, setCitas] = useState([]);
+
+    // Agregar las nuevas citas al state
+    const crearCita = cita => {
+        // tomar una copia del state y añadir nuevo cliente
+        const nuevasCitas = [...citas, cita];
+        // console.log(nuevasCitas)
+        setCitas(nuevasCitas);
+    };
 
     return (
         <Fragment>
@@ -83,9 +103,17 @@ function App() {
             <div className="container">
                 <div className="row">
                     <div className="one-half column">
-                        <Formulario />
+                        <Formulario crearCita={crearCita} />
                     </div>
-                    <div className="one-half column" />
+                    <div className="one-half column">
+                      {citas.map((cita, index) => (
+                        <Cita
+                        key={index}
+                        index={index}
+                        cita={cita}
+                        />
+                      ))}
+                      </div>
                 </div>
             </div>
         </Fragment>
