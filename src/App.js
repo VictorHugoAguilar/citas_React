@@ -1,13 +1,17 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 
 function Formulario({ crearCita }) {
-    const [cita, setCita] = useState({
+    const stateInicial = {
         mascota: "",
         propietario: "",
         fecha: "",
         hora: "",
         sintomas: ""
-    });
+    };
+
+    // cita = state actual
+    // setCita = actualiza el state actual
+    const [cita, setCita] = useState(stateInicial);
 
     const handleChange = e => {
         setCita({
@@ -24,6 +28,7 @@ function Formulario({ crearCita }) {
         crearCita(cita);
 
         // Reiniciar el state
+        setCita(stateInicial);
     };
 
     return (
@@ -37,6 +42,7 @@ function Formulario({ crearCita }) {
                     className="u-full-width"
                     placeholder="Nombre Mascota"
                     onChange={handleChange}
+                    value={cita.mascota}
                 />
 
                 <label>Nombre Dueño</label>
@@ -46,6 +52,7 @@ function Formulario({ crearCita }) {
                     className="u-full-width"
                     placeholder="Nombre Dueño de la Mascota"
                     onChange={handleChange}
+                    value={cita.propietario}
                 />
 
                 <label>Fecha</label>
@@ -54,6 +61,7 @@ function Formulario({ crearCita }) {
                     className="u-full-width"
                     name="fecha"
                     onChange={handleChange}
+                    value={cita.fecha}
                 />
 
                 <label>Hora</label>
@@ -62,6 +70,7 @@ function Formulario({ crearCita }) {
                     className="u-full-width"
                     name="hora"
                     onChange={handleChange}
+                    value={cita.hora}
                 />
 
                 <label>Sintomas</label>
@@ -69,6 +78,7 @@ function Formulario({ crearCita }) {
                     className="u-full-width"
                     name="sintomas"
                     onChange={handleChange}
+                    value={cita.sintomas}
                 />
 
                 <button type="submit" className="button-primary u-full-width">
@@ -79,15 +89,47 @@ function Formulario({ crearCita }) {
     );
 }
 
-function Cita (){
-  
+function Cita({ cita, index, eliminarCita }) {
+    return (
+        <div className="cita">
+            <p>
+                Mascota: <span>{cita.mascota}</span>
+            </p>
+            <p>
+                Dueño: <span>{cita.propietario}</span>
+            </p>
+            <p>
+                Fecha: <span>{cita.fecha}</span>
+            </p>
+            <p>
+                Hora: <span>{cita.hora}</span>
+            </p>
+            <p>
+                Sintomas: <span>{cita.sintomas}</span>
+            </p>
+            <button
+                onClick={() => eliminarCita(index)}
+                type="button"
+                className="button eliminar u-full-width"
+            >
+                Eliminar X
+            </button>
+        </div>
+    );
 }
 
 function App() {
+    // cargar las citas del localStorage
+    let citasIniciales = JSON.parse(localStorage.getItem("citas"));
+
+    if (!citasIniciales) {
+        citasIniciales = [];
+    }
+
     // useState retorna 2 funciones
     // El state actual = this.state;
     // Funcion que actualiza el state es this.setState();
-    const [citas, setCitas] = useState([]);
+    const [citas, setCitas] = useState(citasIniciales);
 
     // Agregar las nuevas citas al state
     const crearCita = cita => {
@@ -96,6 +138,27 @@ function App() {
         // console.log(nuevasCitas)
         setCitas(nuevasCitas);
     };
+
+    // elimina las citas del state
+    const eliminarCita = index => {
+        const nuevasCitas = [...citas];
+        nuevasCitas.splice(index, 1);
+        setCitas(nuevasCitas);
+    };
+
+    // Cargar condicionalmente un titulo
+    const titulo =
+        Object.keys(citas).length === 0 ? "No hay citas" : "Administrar Citas";
+
+    useEffect(() => {
+        let citasIniciales = JSON.parse(localStorage.getItem("citas"));
+
+        if (citasIniciales) {
+            localStorage.setItem("citas", JSON.stringify(citas));
+        } else {
+            localStorage.setItem("cita", JSON.stringify([]));
+        }
+    }, [citas]);
 
     return (
         <Fragment>
@@ -106,14 +169,16 @@ function App() {
                         <Formulario crearCita={crearCita} />
                     </div>
                     <div className="one-half column">
-                      {citas.map((cita, index) => (
-                        <Cita
-                        key={index}
-                        index={index}
-                        cita={cita}
-                        />
-                      ))}
-                      </div>
+                        <h2>{titulo}</h2>
+                        {citas.map((cita, index) => (
+                            <Cita
+                                key={index}
+                                index={index}
+                                cita={cita}
+                                eliminarCita={eliminarCita}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </Fragment>
